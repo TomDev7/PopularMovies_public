@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="no_internet_prompt">No internet connection available!</string>
+    <string name="movie_db_url">http://api.themoviedb.org/3/movie/</string>
+    <string name="movie_db_apikey"></string> <!--TODO insert API key-->
+    <string name="title_activity_movie_detail">Movie details</string>
+
+</resources>

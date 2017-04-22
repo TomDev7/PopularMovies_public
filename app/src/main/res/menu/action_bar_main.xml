@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+        <item android:id="@+id/action_refresh"
+            android:title="Refresh"
+            android:icon="@drawable/ic_refresh_black_24dp"
+            app:showAsAction="always"/>
+        <item android:id="@+id/action_sortby_popularity"
+            android:title="Sort by most popular"
+            android:icon="@drawable/ic_trending_up_black_24dp"
+            app:showAsAction="never"/>
+        <item android:id="@+id/action_sortby_rating"
+            android:title="Sort by highest rated"
+            android:icon="@drawable/ic_grade_black_24dp"
+            app:showAsAction="never"/>
+
+    </menu>
