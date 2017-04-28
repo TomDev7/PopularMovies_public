@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
 
                 @Override
                 public void onFailure(Call<Movies> call, Throwable t) {
-                    //System.out.println("onFailure. " + t.toString());
+                    
                 }
             });
         }
