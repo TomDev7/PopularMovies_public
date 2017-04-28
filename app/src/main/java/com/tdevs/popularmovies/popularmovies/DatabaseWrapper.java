@@ -135,7 +135,6 @@ public class DatabaseWrapper {
 
 				if (genreIdsList == null)
 				{
-					//System.out.println("genreIdsList - failed to be filled");
 					mov.setGenreIds(null);
 				}
 

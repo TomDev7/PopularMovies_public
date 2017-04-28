@@ -65,8 +65,6 @@ public class GreenAdapter extends RecyclerView.Adapter<GreenAdapter.NumberViewHo
         sortedMovies = databaseWrapper.getAllMovies();
         databaseWrapper.close();
 
-        Collections.sort(sortedMovies);
-
         notifyDataSetChanged();
     }
 

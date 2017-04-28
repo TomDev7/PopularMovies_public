@@ -7,8 +7,13 @@ import retrofit2.http.Query;
 
 
 public interface RetrofitInterface {
-    String movieDBUrl = "popular";
+    String movieDBUrlPopularity = "popular";
+    String movieDBUrlRating = "top_rated";
 
-    @GET(movieDBUrl)
-    Call<Movies> listRepos(@Query("api_key") String apiKey);
+
+    @GET(movieDBUrlPopularity)
+    Call<Movies> listReposP(@Query("api_key") String apiKey);
+
+    @GET(movieDBUrlRating)
+    Call<Movies> listReposR(@Query("api_key") String apiKey);
 }

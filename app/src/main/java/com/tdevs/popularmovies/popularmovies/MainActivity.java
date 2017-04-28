@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
         setContentView(R.layout.activity_main);
 
         sharedPreferences = getSharedPreferences("PopularMovies_preferences", MODE_PRIVATE);
-        SingletonClass.getInstance().setContext(getApplicationContext());
         databaseWrapper = new DatabaseWrapper(getApplicationContext());
         mNumberList = (RecyclerView)findViewById(R.id.rv_numbers);
 
@@ -91,14 +90,36 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
             Retrofit myRetrofit = new Retrofit.Builder().baseUrl(getString(R.string.movie_db_url)).addConverterFactory(GsonConverterFactory.create()).build();
             RetrofitInterface myService = myRetrofit.create(RetrofitInterface.class);
 
-            Call<Movies> call = myService.listRepos(getString(R.string.movie_db_apikey));
+            Call<Movies> call = myService.listReposP(getString(R.string.movie_db_apikey));
+
+            if (sharedPreferences.getInt("sortby", 1) == 2)
+            {
+                call = myService.listReposR(getString(R.string.movie_db_apikey));
+            }
+            //the code above makes sure something (movies sorted by popularity) is presented to the user even if something goes wrong
+            //and there is no valid sort option chosen
+            //if there are more sorting options, new if's will be added
 
             call.enqueue(new Callback<Movies>() {
                 @Override
                 public void onResponse(Call<Movies> call, Response<Movies> response) {
 
                     List<OneMovie> movies = response.body().getResults();
+
                     databaseWrapper.open();
+                    databaseWrapper.removeAllMovies();
+
+                    for (int i = 0; i < movies.size(); i++)
+                    {
+                        databaseWrapper.insertOneMovie(movies.get(i));
+                    }
+
+                    databaseWrapper.close();
+
+                    //There was a solution applied to save only new movies that did not occur in the local database
+                    //But as the project requires the data (different data) to be downloaded by each choice of sorting type
+                    //The solution turned out to be an overkill
+                    /*databaseWrapper.open();
                     for (int i = 0; i < movies.size(); i++)
                     {
                         OneMovie a = databaseWrapper.getMovie(movies.get(i).getId());
@@ -109,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                         }
                     }
 
-                    databaseWrapper.close();
+                    databaseWrapper.close();*/
 
                     refreshList();
                 }
@@ -159,12 +180,12 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
         else if (item.getItemId() == R.id.action_sortby_popularity)
         {
             sharedPreferences.edit().putInt("sortby", 1).commit();  //1 = sort by popularity
-            refreshList();
+            downloadData();
         }
         else if (item.getItemId() == R.id.action_sortby_rating)
         {
             sharedPreferences.edit().putInt("sortby", 2).commit();  //2 = sort by rating
-            refreshList();
+            downloadData();
         }
 
         return super.onOptionsItemSelected(item);

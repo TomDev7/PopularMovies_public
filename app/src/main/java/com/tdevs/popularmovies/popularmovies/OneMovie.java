@@ -1,14 +1,12 @@
 package com.tdevs.popularmovies.popularmovies;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 
-public class OneMovie implements Comparable {
+public class OneMovie {
 
 
     public boolean getFavourite() {
@@ -176,39 +174,5 @@ public class OneMovie implements Comparable {
         this.voteAverage = voteAverage;
     }
 
-    @Override
-    public int compareTo(Object mov) {
-        Context appContext = SingletonClass.getInstance().getContext();
-        SharedPreferences sharedPreferences = appContext.getSharedPreferences("PopularMovies_preferences", Context.MODE_PRIVATE);
-        int sortby = sharedPreferences.getInt("sortby", 1);
 
-        switch (sortby)
-        {
-            case 1:
-            {
-                if (getPopularity() > ((OneMovie)mov).getPopularity()) {
-                    return 1;
-                }
-                else if (getPopularity() < ((OneMovie)mov).getPopularity()) {
-                    return -1;
-                }
-                else {
-                    return 0;
-                }
-            }
-            case 2:
-            {
-                if (getVoteAverage() > ((OneMovie)mov).getVoteAverage()) {
-                    return 1;
-                }
-                else if (getVoteAverage() < ((OneMovie)mov).getVoteAverage()) {
-                    return -1;
-                }
-                else {
-                    return 0;
-                }
-            }
-        }
-        return 0;
-    }
 }
