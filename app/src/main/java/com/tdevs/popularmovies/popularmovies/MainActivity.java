@@ -104,17 +104,27 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                 @Override
                 public void onResponse(Call<Movies> call, Response<Movies> response) {
 
-                    List<OneMovie> movies = response.body().getResults();
+                    if (response.code() == 200) {
+                        List<OneMovie> movies = response.body().getResults();
 
-                    databaseWrapper.open();
-                    databaseWrapper.removeAllMovies();
+                        databaseWrapper.open();
+                        databaseWrapper.removeAllMovies();
 
-                    for (int i = 0; i < movies.size(); i++)
-                    {
-                        databaseWrapper.insertOneMovie(movies.get(i));
+                        for (int i = 0; i < movies.size(); i++)
+                        {
+                            databaseWrapper.insertOneMovie(movies.get(i));
+                        }
+
+                        databaseWrapper.close();
+
+                        refreshList();
+                    }
+                    else {
+                        System.out.println("server response code: " + response.code());
+                        System.out.println("check if API Key is appropriate");
                     }
 
-                    databaseWrapper.close();
+
 
                     //There was a solution applied to save only new movies that did not occur in the local database
                     //But as the project requires the data (different data) to be downloaded by each choice of sorting type
@@ -131,13 +141,11 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                     }
 
                     databaseWrapper.close();*/
-
-                    refreshList();
                 }
 
                 @Override
                 public void onFailure(Call<Movies> call, Throwable t) {
-                    
+
                 }
             });
         }

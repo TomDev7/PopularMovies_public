@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -144,9 +145,16 @@ public class GreenAdapter extends RecyclerView.Adapter<GreenAdapter.NumberViewHo
 
         @Override
         public void onClick(View view) {
-            int selectedMovieId = sortedMovies.get(getAdapterPosition()).getId();
 
-            mOnClickListener.onListItemClick(selectedMovieId);
+            if (sortedMovies != null && sortedMovies.size() != 0)
+            {
+                int selectedMovieId = sortedMovies.get(getAdapterPosition()).getId();
+                mOnClickListener.onListItemClick(selectedMovieId);
+            }
+            else
+            {
+                //some handling of the situation might be here
+            }
         }
     }
 }
