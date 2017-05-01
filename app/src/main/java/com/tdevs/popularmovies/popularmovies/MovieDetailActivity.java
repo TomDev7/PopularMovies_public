@@ -1,13 +1,16 @@
 package com.tdevs.popularmovies.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -19,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 import okhttp3.ResponseBody;
@@ -40,8 +44,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     DatabaseWrapper databaseWrapper;
     private OneMovie movie;
     private MaterialRatingBar materialRatingBar;
-    ListView trailersListView;
-
+    List<Result> trailersList;
+    LinearLayout trailersListLinearLayout;
 
 
     public OneMovie getMovie() {
@@ -65,7 +69,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         materialRatingBar = (MaterialRatingBar)findViewById(R.id.ratingBar_averageVote);
         fabFavourite = (FloatingActionButton)findViewById(R.id.fab);
         databaseWrapper = new DatabaseWrapper(getApplicationContext());
-        trailersListView = (ListView)findViewById(R.id.trailers_list_view);
+        trailersListLinearLayout = (LinearLayout)findViewById(R.id.trailers_linear_layout);
 
         Intent invokingIntent = getIntent();
 
@@ -142,19 +146,30 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                 System.out.println("response id: " + response.body().getId());
                 System.out.println("response result 1: " + response.body().getResults().get(0).getName());
+                trailersList = response.body().getResults();
 
-                final TrailersListAdapter trailersAdapter = new TrailersListAdapter(response.body().getResults(), getApplicationContext());
-                trailersListView.setAdapter(trailersAdapter);
+                LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-                trailersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                int i = 0;
+                for (Result trailer : trailersList) {
+                    View row = inflater.inflate(R.layout.trailer_list_item, null);
+                    TextView trailerName = (TextView) row.findViewById(R.id.trailer_name_text_view);
+                    final TextView trailerKey = (TextView) row.findViewById(R.id.trailer_key_text_view);
+                    trailerName.setText(trailer.getName() + i);
+                    trailerKey.setText(trailer.getKey());
+                    trailersListLinearLayout.addView(row);
 
-                        String videoUri = "https://www.youtube.com/watch?v=" + trailersAdapter.getTrailerKey(i);
-                        Intent trailerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUri));
-                        startActivity(trailerIntent);
-                    }
-                });
+                    row.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String videoUri = "https://www.youtube.com/watch?v=" + trailerKey.getText();
+                            Intent trailerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUri));
+                            startActivity(trailerIntent);
+                        }
+                    });
+
+                    i++;
+                }
             }
 
             @Override

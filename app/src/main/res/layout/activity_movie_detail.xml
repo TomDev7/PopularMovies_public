@@ -103,16 +103,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <ListView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:id="@+id/trailers_list_view"
-            android:divider="#e0e0e0"
-            android:dividerHeight="1px"
-            android:clickable="true"
-            android:focusableInTouchMode="true"
-            android:focusable="true"
-            android:nestedScrollingEnabled="true" />
+            android:layout_height="wrap_content"
+            android:id="@+id/trailers_linear_layout"></LinearLayout>
+
     </LinearLayout>
 
 
