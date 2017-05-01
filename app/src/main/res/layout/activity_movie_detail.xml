@@ -107,7 +107,17 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/trailers_linear_layout"></LinearLayout>
+            android:id="@+id/trailers_linear_layout"
+            android:layout_marginBottom="@dimen/detail_view_spacing">
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/reviews_linear_layout"
+            android:layout_marginTop="@dimen/detail_view_spacing"></LinearLayout>
 
     </LinearLayout>
 

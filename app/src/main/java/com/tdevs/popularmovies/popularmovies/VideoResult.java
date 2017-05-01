@@ -3,7 +3,7 @@ package com.tdevs.popularmovies.popularmovies;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Result {
+public class VideoResult {
 
     @SerializedName("id")
     @Expose

@@ -8,30 +8,20 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import me.zhanghai.android.materialratingbar.MaterialRatingBar;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 
 public class MovieDetailActivity extends AppCompatActivity {
@@ -44,8 +34,10 @@ public class MovieDetailActivity extends AppCompatActivity {
     DatabaseWrapper databaseWrapper;
     private OneMovie movie;
     private MaterialRatingBar materialRatingBar;
-    List<Result> trailersList;
+    List<VideoResult> trailersList;
+    List<ReviewResult> reviewsList;
     LinearLayout trailersListLinearLayout;
+    LinearLayout reviewsLinearLayout;
 
 
     public OneMovie getMovie() {
@@ -70,6 +62,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         fabFavourite = (FloatingActionButton)findViewById(R.id.fab);
         databaseWrapper = new DatabaseWrapper(getApplicationContext());
         trailersListLinearLayout = (LinearLayout)findViewById(R.id.trailers_linear_layout);
+        reviewsLinearLayout = (LinearLayout)findViewById(R.id.reviews_linear_layout);
 
         Intent invokingIntent = getIntent();
 
@@ -129,7 +122,12 @@ public class MovieDetailActivity extends AppCompatActivity {
             fabFavourite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
         }
 
+        downlowadTrailers();
+        downloadReviews();
+    }
 
+    private void downlowadTrailers()
+    {
         System.out.println("Beginning videos download");
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.movie_db_url))
@@ -150,12 +148,11 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                 LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-                int i = 0;
-                for (Result trailer : trailersList) {
+                for (VideoResult trailer : trailersList) {
                     View row = inflater.inflate(R.layout.trailer_list_item, null);
                     TextView trailerName = (TextView) row.findViewById(R.id.trailer_name_text_view);
                     final TextView trailerKey = (TextView) row.findViewById(R.id.trailer_key_text_view);
-                    trailerName.setText(trailer.getName() + i);
+                    trailerName.setText(trailer.getName());
                     trailerKey.setText(trailer.getKey());
                     trailersListLinearLayout.addView(row);
 
@@ -167,14 +164,58 @@ public class MovieDetailActivity extends AppCompatActivity {
                             startActivity(trailerIntent);
                         }
                     });
-
-                    i++;
                 }
             }
 
             @Override
             public void onFailure(Call<VideosResponse> call, Throwable t) {
                 System.out.println("onFailure videos download");
+            }
+        });
+    }
+
+    private void downloadReviews()
+    {
+        System.out.println("downloadReviews");
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(getString(R.string.movie_db_url))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        RetrofitInterface retrofitInterface = retrofit.create(RetrofitInterface.class);
+        Call<ReviewsResponse> result = retrofitInterface.getReviews(movie.getId().toString(), getString(R.string.movie_db_apikey));
+
+        result.enqueue(new Callback<ReviewsResponse>(){
+
+            @Override
+            public void onResponse(Call<ReviewsResponse> call, Response<ReviewsResponse> response) {
+
+                reviewsList = response.body().getResults();
+                LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                for (ReviewResult review : reviewsList) {
+                    View row = inflater.inflate(R.layout.review_list_item, null);
+                    TextView reviewText = (TextView) row.findViewById(R.id.review_text_text_view);
+                    TextView reviewAuthor = (TextView) row.findViewById(R.id.review_author_text_view);
+                    final TextView reviewUrl = (TextView) row.findViewById(R.id.review_url_text_view);
+                    reviewText.setText(review.getContent());
+                    reviewAuthor.setText("Review by " + review.getAuthor());
+                    reviewUrl.setText(review.getUrl());
+                    reviewsLinearLayout.addView(row);
+
+                    row.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent reviewIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(reviewUrl.getText().toString()));
+                            startActivity(reviewIntent);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewsResponse> call, Throwable t) {
+                System.out.println("onFailure downloadReviews");
             }
         });
     }
