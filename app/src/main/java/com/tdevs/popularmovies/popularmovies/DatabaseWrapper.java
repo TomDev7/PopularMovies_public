@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,12 +69,19 @@ public class DatabaseWrapper {
 				VOTE_AVERAGE_COLUMN + " DOUBLE," +
 				FAVOURITE_COLUMN + " INTEGER" +
 				");" );
+
+			db.execSQL("CREATE TABLE " + Contract.FavoriteEntry.TABLE_NAME + " (" +
+					Contract.FavoriteEntry._ID + " INTEGER PRIMARY KEY," +
+					Contract.FavoriteEntry.COLUMN_MOVID + " TEXT," +
+					Contract.FavoriteEntry.COLUMN_TITLE + " TEXT" +
+					");" );
 		}
 
 
 			@Override
 			public void onUpgrade(SQLiteDatabase db, int oldVer, int newVer) {
 				db.execSQL("DROP TABLE IF EXISTS" + MOVIES_TABLE);
+				db.execSQL("DROP TABLE IF EXISTS" + Contract.FavoriteEntry.TABLE_NAME);
 				onCreate(db);
 			}
 
@@ -92,6 +100,21 @@ public class DatabaseWrapper {
 			mOpenHelper.close();
 			db.close();
 		}
+
+		public SQLiteDatabase getWrDatabase() {
+
+			SQLiteDatabase sqldb = mOpenHelper.getWritableDatabase();
+			return sqldb;
+		}
+
+		public SQLiteDatabase getReDatabase() {
+
+			SQLiteDatabase sqldb = mOpenHelper.getWritableDatabase();
+			return sqldb;
+		}
+
+
+
 
 		public Cursor getTables() {
 			Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'",null);
@@ -166,6 +189,7 @@ public class DatabaseWrapper {
 		{
 			db.delete(MOVIES_TABLE, "1", null);
 		}
+
 
 		public void setMovieFavourite(OneMovie movie)
 		{

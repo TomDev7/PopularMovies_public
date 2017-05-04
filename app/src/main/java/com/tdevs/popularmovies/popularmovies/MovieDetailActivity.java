@@ -1,7 +1,9 @@
 package com.tdevs.popularmovies.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -38,6 +40,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     List<ReviewResult> reviewsList;
     LinearLayout trailersListLinearLayout;
     LinearLayout reviewsLinearLayout;
+    boolean isMovieFavorite;
 
 
     public OneMovie getMovie() {
@@ -87,40 +90,73 @@ public class MovieDetailActivity extends AppCompatActivity {
             textViewDescription.setText(movie.getOverview());
             Picasso.with(getApplicationContext()).load("http://image.tmdb.org/t/p/" + "w500" + movie.getPosterPath()).into(imageViewPoster);
             textViewDate.setText(movie.getReleaseDate());
-            //ratingBarVoteAverage.setNumStars(10);
-            //ratingBarVoteAverage.setRating(movie.getVoteAverage().floatValue());
-        materialRatingBar.setNumStars(10);
-        materialRatingBar.setRating(movie.getVoteAverage().floatValue());
+            materialRatingBar.setNumStars(10);
+            materialRatingBar.setRating(movie.getVoteAverage().floatValue());
 
         fabFavourite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (getMovie().getFavourite())
+                if (isMovieFavorite)
                 {
-                    setMovieFavourite(false);
+                    isMovieFavorite = false;
                     fabFavourite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+
+                    String[] idsToDelete = {getMovie().getId().toString()};
+                    Uri uriToDelete = Contract.FavoriteEntry.CONTENT_URI.buildUpon().appendPath(getMovie().getId().toString()).build();
+                    int favDel = getContentResolver().delete(uriToDelete, null, null);
+                    System.out.println("favDel = " + favDel);
+
                 }
                 else
                 {
-                    setMovieFavourite(true);
+                    isMovieFavorite = true;
                     fabFavourite.setImageResource(R.drawable.ic_favorite_black_18dp);
-                }
 
-                databaseWrapper.open();
-                databaseWrapper.setMovieFavourite(getMovie());
-                databaseWrapper.close();
+                    //add row to table with favorites
+                    ContentValues cv = new ContentValues();
+                    cv.put(Contract.FavoriteEntry.COLUMN_MOVID, getMovie().getId());
+                    cv.put(Contract.FavoriteEntry.COLUMN_TITLE, getMovie().getTitle());
+
+                    Uri uri = getContentResolver().insert(Contract.FavoriteEntry.CONTENT_URI, cv);
+
+                    //print whole favorites table //TODO remove
+
+                    String[] projection = {Contract.FavoriteEntry.COLUMN_TITLE};
+                    Cursor c = getContentResolver().query(Contract.FavoriteEntry.CONTENT_URI, projection, null, null, null);
+                    c.moveToFirst();
+
+                    while (!c.isAfterLast()) {
+                        System.out.println("favorite : " + c.getString(0));
+                        c.moveToNext();
+                    }
+
+                    c.close();
+                }
             }
         });
 
-        if (movie.getFavourite())
-        {
-            fabFavourite.setImageResource(R.drawable.ic_favorite_black_18dp);
+        //setting appropriate FAB icon
+        fabFavourite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+        isMovieFavorite = false;
+
+        String[] projection = {Contract.FavoriteEntry.COLUMN_MOVID};
+        Cursor c = getContentResolver().query(Contract.FavoriteEntry.CONTENT_URI, projection, null, null, null);
+        c.moveToFirst();
+
+        while (!c.isAfterLast()) {
+
+            if (c.getString(0).contentEquals(getMovie().getId().toString())) {
+
+                fabFavourite.setImageResource(R.drawable.ic_favorite_black_18dp);
+                isMovieFavorite = true;
+                break;
+            }
+            c.moveToNext();
         }
-        else
-        {
-            fabFavourite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-        }
+
+        c.close();
+
 
         downlowadTrailers();
         downloadReviews();

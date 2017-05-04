@@ -23,6 +23,12 @@
             android:name=".MovieDetailActivity"
             android:label="@string/title_activity_movie_detail"
             android:parentActivityName="com.tdevs.popularmovies.popularmovies.MainActivity"></activity>
+
+        <provider
+            android:name="com.tdevs.popularmovies.popularmovies.FavoritesContentProvider"
+            android:authorities="com.tdevs.popularmovies.popularmovies"
+            android:exported="false">
+        </provider>
     </application>
 
 </manifest>
