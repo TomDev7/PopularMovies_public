@@ -47,10 +47,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         return movie;
     }
 
-    public void setMovieFavourite(boolean favourite) {
-        movie.setFavourite(favourite);
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,11 +98,8 @@ public class MovieDetailActivity extends AppCompatActivity {
                     isMovieFavorite = false;
                     fabFavourite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
 
-                    String[] idsToDelete = {getMovie().getId().toString()};
                     Uri uriToDelete = Contract.FavoriteEntry.CONTENT_URI.buildUpon().appendPath(getMovie().getId().toString()).build();
-                    int favDel = getContentResolver().delete(uriToDelete, null, null);
-                    System.out.println("favDel = " + favDel);
-
+                    getContentResolver().delete(uriToDelete, null, null);
                 }
                 else
                 {
@@ -118,20 +111,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     cv.put(Contract.FavoriteEntry.COLUMN_MOVID, getMovie().getId());
                     cv.put(Contract.FavoriteEntry.COLUMN_TITLE, getMovie().getTitle());
 
-                    Uri uri = getContentResolver().insert(Contract.FavoriteEntry.CONTENT_URI, cv);
-
-                    //print whole favorites table //TODO remove
-
-                    String[] projection = {Contract.FavoriteEntry.COLUMN_TITLE};
-                    Cursor c = getContentResolver().query(Contract.FavoriteEntry.CONTENT_URI, projection, null, null, null);
-                    c.moveToFirst();
-
-                    while (!c.isAfterLast()) {
-                        System.out.println("favorite : " + c.getString(0));
-                        c.moveToNext();
-                    }
-
-                    c.close();
+                    getContentResolver().insert(Contract.FavoriteEntry.CONTENT_URI, cv);
                 }
             }
         });
@@ -164,7 +144,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void downlowadTrailers()
     {
-        System.out.println("Beginning videos download");
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.movie_db_url))
                 .addConverterFactory(GsonConverterFactory.create())
@@ -172,14 +151,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         RetrofitInterface retrofitInterface = retrofit.create(RetrofitInterface.class);
         Call<VideosResponse> result = retrofitInterface.getVideos(movie.getId().toString(), getString(R.string.movie_db_apikey));
 
-        System.out.println("Call: " + result.toString());
 
         result.enqueue(new Callback<VideosResponse>() {
             @Override
             public void onResponse(Call<VideosResponse> call, Response<VideosResponse> response) {
 
-                System.out.println("response id: " + response.body().getId());
-                System.out.println("response result 1: " + response.body().getResults().get(0).getName());
                 trailersList = response.body().getResults();
 
                 LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -212,8 +188,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void downloadReviews()
     {
-        System.out.println("downloadReviews");
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.movie_db_url))
                 .addConverterFactory(GsonConverterFactory.create())

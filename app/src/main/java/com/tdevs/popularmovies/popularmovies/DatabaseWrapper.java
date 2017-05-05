@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -191,35 +190,6 @@ public class DatabaseWrapper {
 		}
 
 
-		public void setMovieFavourite(OneMovie movie)
-		{
-			ContentValues cv = new ContentValues();
-			cv.put(ID_COLUMN, movie.getId());
-			cv.put(RELEASE_DATE_COLUMN, movie.getReleaseDate());
-			cv.put(ORIGINAL_TITLE_COLUMN, movie.getOriginalTitle());
-			cv.put(TITLE_COLUMN, movie.getTitle());
-			cv.put(POSTER_PATH_COLUMN, movie.getPosterPath());
-			cv.put(OVERVIEW_COLUMN, movie.getOverview());
-			cv.put(ADULT_COLUMN, movie.getAdult());
-
-			JSONArray genreIdsJson = new JSONArray();
-			for (int i = 0; i < movie.getGenreIds().size(); i++)
-			{
-				genreIdsJson.put(movie.getGenreIds().get(i));
-			}
-			cv.put(GENRE_IDS_COLUMN, genreIdsJson.toString());
-
-			cv.put(ORIGINAL_LANGUAGE_COLUMN, movie.getOriginalLanguage());
-			cv.put(BACKDROP_PATH_COLUMN, movie.getBackdropPath());
-			cv.put(POPULARITY_COLUMN, movie.getPopularity());
-			cv.put(VOTE_COUNT_COLUMN, movie.getVoteCount());
-			cv.put(VIDEO_COLUMN, movie.getVideo());
-			cv.put(VOTE_AVERAGE_COLUMN, movie.getVoteAverage());
-			cv.put(FAVOURITE_COLUMN, movie.getFavourite());
-
-			db.update(MOVIES_TABLE, cv, "id="+movie.getId(), null);
-		}
-
 		public void insertOneMovie(OneMovie mov)
 	{
 		ContentValues cv = new ContentValues();
@@ -239,7 +209,6 @@ public class DatabaseWrapper {
 			}
 		}
 		cv.put(GENRE_IDS_COLUMN, genreIdsJson.toString());
-		System.out.println("genresIds to write: " + genreIdsJson.toString());
 
 		cv.put(ORIGINAL_LANGUAGE_COLUMN, mov.getOriginalLanguage());
 		cv.put(BACKDROP_PATH_COLUMN, mov.getBackdropPath());

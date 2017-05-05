@@ -16,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -127,24 +126,6 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                         System.out.println("server response code: " + response.code());
                         System.out.println("check if API Key is appropriate");
                     }
-
-
-
-                    //There was a solution applied to save only new movies that did not occur in the local database
-                    //But as the project requires the data (different data) to be downloaded by each choice of sorting type
-                    //The solution turned out to be an overkill
-                    /*databaseWrapper.open();
-                    for (int i = 0; i < movies.size(); i++)
-                    {
-                        OneMovie a = databaseWrapper.getMovie(movies.get(i).getId());
-
-                        if (a == null)
-                        {
-                            databaseWrapper.insertOneMovie(movies.get(i));
-                        }
-                    }
-
-                    databaseWrapper.close();*/
                 }
 
                 @Override
@@ -163,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
     {
         databaseWrapper.open();
 
-        System.out.println("refresh list num of movies: " + databaseWrapper.getNumOfMovies());
         mAdapter.changeItemCount(databaseWrapper.getNumOfMovies());
         mAdapter.notifyDataSetChangedOverride();
 
@@ -195,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
             sharedPreferences.edit().putInt("sortby", 2).commit();  //2 = sort by rating
             downloadData();
         } else if (item.getItemId() == R.id.action_show_favorites) {
-            System.out.println("show favorites");
             downloadFavorites();
         }
 
@@ -235,7 +214,6 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
         c.moveToFirst();
 
         while (!c.isAfterLast()) {
-            System.out.println("favorite : " + c.getString(0));
 
             Call<MovieDetailed> call = myService.getMovieDetailed(c.getString(0), getString(R.string.movie_db_apikey));
             call.enqueue(new Callback<MovieDetailed>() {
@@ -244,8 +222,6 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                 public void onResponse(Call<MovieDetailed> call, Response<MovieDetailed> response) {
 
                     OneMovie oneMovie = new OneMovie();
-
-                    System.out.println("movie to be saved: " + oneMovie.getTitle());
 
                     if (response.code() == 200) {
                         oneMovie.setId(response.body().getId());
@@ -274,7 +250,8 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                 @Override
                 public void onFailure(Call<MovieDetailed> call, Throwable t) {
 
-                    System.out.println("onFailure");
+                    numberOfFavorites--;
+                    favoritesDownloadFinished();
                 }
             });
 
@@ -295,11 +272,8 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
                 Toast.makeText(getApplicationContext(), "Not all favorite movies can be displayed - check your Internet connection.", Toast.LENGTH_LONG).show();
             }
 
-            System.out.println("favoritesDownloadFinished - now refresh");
             refreshList();
         }
-
-        System.out.println("favoritesDownloadFinished: " + numberOfFavorites);
 
         return false;
     }

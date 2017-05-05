@@ -4,18 +4,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.Collections;
 import java.util.List;
 
 public class GreenAdapter extends RecyclerView.Adapter<GreenAdapter.NumberViewHolder> {
@@ -65,8 +62,6 @@ public class GreenAdapter extends RecyclerView.Adapter<GreenAdapter.NumberViewHo
         databaseWrapper.open();
         sortedMovies = databaseWrapper.getAllMovies();
         databaseWrapper.close();
-
-        System.out.println("num of read movies: " + sortedMovies.size());
 
         notifyDataSetChanged();
     }

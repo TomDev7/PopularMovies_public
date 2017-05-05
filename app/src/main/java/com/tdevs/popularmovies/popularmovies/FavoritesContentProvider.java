@@ -11,9 +11,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-/**
- * Created by Tomasz on 04.05.2017.
- */
+
 
 public class FavoritesContentProvider extends ContentProvider {
 
@@ -59,7 +57,6 @@ public class FavoritesContentProvider extends ContentProvider {
             }
             case FAVORITE_WITH_ID:
             {
-                //TODO really needed?
                 retCursor = db.query(Contract.FavoriteEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             }
@@ -78,9 +75,7 @@ public class FavoritesContentProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
 
-        throw new UnsupportedOperationException("getTYPE NOT YET IMPLEMENTED");
-
-        //return null;
+        return null;
     }
 
     @Nullable
@@ -95,12 +90,8 @@ public class FavoritesContentProvider extends ContentProvider {
         {
             case FAVORITES:
             {
-                System.out.println("table name: " + Contract.FavoriteEntry.TABLE_NAME);
-                System.out.println("cv: " + contentValues);
-
                 databaseWrapper.open();
                 long id = db.insert(Contract.FavoriteEntry.TABLE_NAME, null, contentValues);
-                System.out.println("id = " + id);
 
                 if (id > 0) {
                     returnUri = ContentUris.withAppendedId(Contract.FavoriteEntry.CONTENT_URI, id);
@@ -157,8 +148,6 @@ public class FavoritesContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
 
-        throw new UnsupportedOperationException("update not yet implemented");
-
-        //return 0;
+        return 0;
     }
 }

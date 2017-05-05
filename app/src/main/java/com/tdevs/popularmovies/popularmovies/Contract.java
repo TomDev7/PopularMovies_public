@@ -3,9 +3,6 @@ package com.tdevs.popularmovies.popularmovies;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-/**
- * Created by Tomasz on 04.05.2017.
- */
 
 public class Contract {
 
