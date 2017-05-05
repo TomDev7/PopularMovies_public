@@ -24,4 +24,7 @@ public interface RetrofitInterface {
 
     @GET("{movid}/reviews")
     Call<ReviewsResponse> getReviews(@Path("movid") String movid, @Query("api_key") String apiKey);
+
+    @GET("{movid}")
+    Call<MovieDetailed> getMovieDetailed(@Path("movid") String movid, @Query("api_key") String apiKey);
 }

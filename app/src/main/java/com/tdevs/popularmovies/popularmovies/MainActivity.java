@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -29,6 +31,8 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
     private RecyclerView mNumberList;
     private SharedPreferences sharedPreferences;
     private DatabaseWrapper databaseWrapper;
+    private int numberOfFavorites;
+    private boolean downloadWithMissingMovies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
     {
         databaseWrapper.open();
 
+        System.out.println("refresh list num of movies: " + databaseWrapper.getNumOfMovies());
         mAdapter.changeItemCount(databaseWrapper.getNumOfMovies());
         mAdapter.notifyDataSetChangedOverride();
 
@@ -177,26 +182,126 @@ public class MainActivity extends AppCompatActivity implements GreenAdapter.List
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.action_refresh)
-        {
+        if (item.getItemId() == R.id.action_refresh) {
             Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
 
             downloadData();
 
             return true;
-        }
-        else if (item.getItemId() == R.id.action_sortby_popularity)
-        {
+        } else if (item.getItemId() == R.id.action_sortby_popularity) {
             sharedPreferences.edit().putInt("sortby", 1).commit();  //1 = sort by popularity
             downloadData();
-        }
-        else if (item.getItemId() == R.id.action_sortby_rating)
-        {
+        } else if (item.getItemId() == R.id.action_sortby_rating) {
             sharedPreferences.edit().putInt("sortby", 2).commit();  //2 = sort by rating
             downloadData();
+        } else if (item.getItemId() == R.id.action_show_favorites) {
+            System.out.println("show favorites");
+            downloadFavorites();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean downloadFavorites() {
+
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+
+        if(netInfo == null || !netInfo.isConnectedOrConnecting())
+        {
+            Toast.makeText(this, R.string.no_internet_prompt, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+
+        databaseWrapper.open();
+        databaseWrapper.removeAllMovies();
+        databaseWrapper.close();
+        downloadWithMissingMovies = false;
+
+        String[] projection = {Contract.FavoriteEntry.COLUMN_MOVID};
+        Retrofit myRetrofit = new Retrofit.Builder().baseUrl(getString(R.string.movie_db_url)).addConverterFactory(GsonConverterFactory.create()).build();
+        RetrofitInterface myService = myRetrofit.create(RetrofitInterface.class);
+        Cursor c = getContentResolver().query(Contract.FavoriteEntry.CONTENT_URI, projection, null, null, null);
+        numberOfFavorites = c.getCount();
+
+        if (numberOfFavorites == 0)
+        {
+            favoritesDownloadFinished();
+            Toast.makeText(getApplicationContext(), "You have no favorites - find ones!", Toast.LENGTH_LONG).show();
+        }
+
+        c.moveToFirst();
+
+        while (!c.isAfterLast()) {
+            System.out.println("favorite : " + c.getString(0));
+
+            Call<MovieDetailed> call = myService.getMovieDetailed(c.getString(0), getString(R.string.movie_db_apikey));
+            call.enqueue(new Callback<MovieDetailed>() {
+
+                @Override
+                public void onResponse(Call<MovieDetailed> call, Response<MovieDetailed> response) {
+
+                    OneMovie oneMovie = new OneMovie();
+
+                    System.out.println("movie to be saved: " + oneMovie.getTitle());
+
+                    if (response.code() == 200) {
+                        oneMovie.setId(response.body().getId());
+                        oneMovie.setVoteAverage(response.body().getVoteAverage());
+                        oneMovie.setOverview(response.body().getOverview());
+                        oneMovie.setPopularity(response.body().getPopularity());
+                        oneMovie.setPosterPath(response.body().getPosterPath());
+                        oneMovie.setReleaseDate(response.body().getReleaseDate());
+                        oneMovie.setTitle(response.body().getTitle());
+                        oneMovie.setVoteCount(response.body().getVoteCount());
+
+                        databaseWrapper.open();
+                        databaseWrapper.insertOneMovie(oneMovie);
+                        databaseWrapper.close();
+                    }
+                    else {
+                        System.out.println("server response code: " + response.code());
+                        System.out.println("check if API Key is appropriate");
+                        downloadWithMissingMovies = true;
+                    }
+
+                    numberOfFavorites--;
+                    favoritesDownloadFinished();
+                }
+
+                @Override
+                public void onFailure(Call<MovieDetailed> call, Throwable t) {
+
+                    System.out.println("onFailure");
+                }
+            });
+
+
+            c.moveToNext();
+        }
+
+        c.close();
+
+        return true;
+    }
+
+    private boolean favoritesDownloadFinished() {
+
+        if (numberOfFavorites == 0) {
+
+            if (downloadWithMissingMovies == true) {
+                Toast.makeText(getApplicationContext(), "Not all favorite movies can be displayed - check your Internet connection.", Toast.LENGTH_LONG).show();
+            }
+
+            System.out.println("favoritesDownloadFinished - now refresh");
+            refreshList();
+        }
+
+        System.out.println("favoritesDownloadFinished: " + numberOfFavorites);
+
+        return false;
     }
 
 

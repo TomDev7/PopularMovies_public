@@ -233,9 +233,10 @@ public class DatabaseWrapper {
 		cv.put(ADULT_COLUMN, mov.getAdult());
 
 		JSONArray genreIdsJson = new JSONArray();
-		for (int i = 0; i < mov.getGenreIds().size(); i++)
-		{
-			genreIdsJson.put(mov.getGenreIds().get(i));
+		if (mov.getGenreIds() != null) {
+			for (int i = 0; i < mov.getGenreIds().size(); i++) {
+				genreIdsJson.put(mov.getGenreIds().get(i));
+			}
 		}
 		cv.put(GENRE_IDS_COLUMN, genreIdsJson.toString());
 		System.out.println("genresIds to write: " + genreIdsJson.toString());

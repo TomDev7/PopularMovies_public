@@ -16,5 +16,9 @@
             android:title="Sort by highest rated"
             android:icon="@drawable/ic_grade_black_24dp"
             app:showAsAction="never"/>
+        <item android:id="@+id/action_show_favorites"
+            android:title="Show favorites"
+            android:icon="@drawable/ic_favorite_black_18dp"
+            app:showAsAction="never"/>
 
     </menu>
